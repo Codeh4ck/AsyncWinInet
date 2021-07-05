@@ -1,13 +1,26 @@
-typedef struct _InetContext
-{
-    AsyncInet *obj;
-    DWORD dwContext;
-} InetContext;
+#include <Windows.h>
+#include <WinInet.h>
+#include <string>
+#include <stdio.h>
+#include <iostream>
 
-typedef enum _RequestType {
+#pragma execution_character_set( "utf-8" ) 
+
+#define WIN32_LEAN_AND_MEAN
+#pragma once
+
+class AsyncInet;
+
+struct InetContext
+{
+    AsyncInet* obj;
+    DWORD dwContext;
+};
+
+enum class RequestType {
     GET,
     POST
-} RequestType;
+};
 
 class AsyncInet
 {
@@ -21,16 +34,16 @@ public:
     };
 
     BOOL Connect(
-        string szAddr,
+        std::string szAddr,
         unsigned short port = INTERNET_DEFAULT_HTTP_PORT,
-        string szAgent = "AsyncInet",
+        std::string szAgent = "AsyncInet",
         DWORD dwTimeout = 20 * 1000);
 
     BOOL SendRequest(
-        string szURL,
+        std::string szURL,
         RequestType requestType,
-        string szRequestData,
-        string szReferrer,
+        std::string szRequestData,
+        std::string szReferrer,
         DWORD dwTimeout = 20 * 1000);
 
     unsigned long ReadData(
