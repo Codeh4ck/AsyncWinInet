@@ -14,48 +14,65 @@ The asynchronous technology used will ensure that a response will be waited for 
 **Example GET request:**
 
 ```c++
+#include "AsyncInet.h"
+
 using namespace std;
-AsyncInet inet;
-if (inet.Connect("example.com"))
+int main(void)
 {
-    if (inet.SendRequest("test.php?id=5", RequestType::GET, "", ""))
+    AsyncInet inet;
+
+    if (inet.Connect("example.com"))
     {
-        string szResponse;
-        char szBuf[1024];
-        int iLength;
-
-        while ((iLength = inet.ReadData(reinterpret_cast<PBYTE>(szBuf), 1024)) > 0)
+        if (inet.SendRequest("test.php?id=5", RequestType::GET, "", ""))
         {
+            string szResponse;
+            char szBuf[1024];
+            int iLength;
 
-            szBuf[iLength] = 0;                
-            szResponse += szBuf;
+            while ((iLength = inet.ReadData(reinterpret_cast<PBYTE>(szBuf), 1024)) > 0)
+            {
+
+                szBuf[iLength] = 0;
+                szResponse += szBuf;
+            }
+
+            cout << szResponse.c_str() << endl;
         }
-
-        cout << szResponse.c_str() << endl;
     }
-}
+
+
+    return 0;
+};
 ```
 
 **Example POST request:**
 ```c++
+#include "AsyncInet.h"
+
 using namespace std;
-AsyncInet inet;
-if (inet.Connect("example.com"))
+int main(void)
 {
-    if (inet.SendRequest("test.php", RequestType::POST, "somedata=somevalue&anotherone=anothervalue", ""))
+    AsyncInet inet;
+
+    if (inet.Connect("httpbin.org"))
     {
-        string szResponse;
-        char szBuf[1024];
-        int iLength;
-
-        while ((iLength = inet.ReadData(reinterpret_cast<PBYTE>(szBuf), 1024)) > 0)
+        if (inet.SendRequest("post", RequestType::POST, "somedata=somevalue&anotherone=anothervalue", ""))
         {
+            string szResponse;
+            char szBuf[1024];
+            int iLength;
 
-            szBuf[iLength] = 0;                
-            szResponse += szBuf;
+            while ((iLength = inet.ReadData(reinterpret_cast<PBYTE>(szBuf), 1024)) > 0)
+            {
+                szBuf[iLength] = 0;
+                szResponse += szBuf;
+            }
+
+            cout << szResponse.c_str() << endl;
         }
-
-        cout << szResponse.c_str() << endl;
     }
-}
+
+
+    return 0;
+};
 ```

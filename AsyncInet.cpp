@@ -1,4 +1,5 @@
 #include "AsyncInet.h"
+#pragma comment(lib, "Wininet.lib")
 
 AsyncInet::AsyncInet()
 {
@@ -9,6 +10,9 @@ AsyncInet::AsyncInet()
     this->hInetInstance = NULL;
     this->hInetConnect = NULL;
     this->hInetRequest = NULL;
+
+    this->context.obj = nullptr;
+    this->context.dwContext = NULL;
 }
 
 AsyncInet::~AsyncInet()
@@ -25,21 +29,15 @@ AsyncInet::~AsyncInet()
     CloseConnection();
 }
 
-BOOL AsyncInet::Connect(
-    string szAddr,
-    unsigned short port,
-    string szAgent,
-    DWORD dwTimeout)
+BOOL AsyncInet::Connect( std::string szAddr, unsigned short port, std::string szAgent, DWORD dwTimeout)
 {
     CloseConnection();
 
     ResetEvent(this->hConnectEvent);
     ResetEvent(this->hRequestOpenEvent);
     ResetEvent(this->hRequestCompleteEvent);
-
-    if (!(this->hInetInstance =
-        InternetOpenA(szAgent.c_str(),
-        INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC)))
+    
+    if (!(this->hInetInstance = InternetOpenA(szAgent.c_str(),INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC)))
     {
         return FALSE;
     }
@@ -130,13 +128,13 @@ void WINAPI AsyncInet::CallbackFunction(
     }
 }
 
-BOOL AsyncInet::SendRequest(string szURL, RequestType requestType, string szRequestData, string szReferrer, DWORD dwTimeout)
+BOOL AsyncInet::SendRequest(std::string szURL, RequestType requestType, std::string szRequestData, std::string szReferrer, DWORD dwTimeout)
 {
 
     this->context.dwContext = AsyncInet::CONTEXT_REQUESTHANDLE;
     this->context.obj = this;
 
-    string szVerb;
+    std::string szVerb;
     if (requestType == RequestType::GET)
         szVerb = "GET";
     else
@@ -151,7 +149,7 @@ BOOL AsyncInet::SendRequest(string szURL, RequestType requestType, string szRequ
 
     if (this->hInetRequest == NULL)
     {
-        cerr << GetLastError() << endl;
+        std::cerr << GetLastError() << std::endl;
         if (GetLastError() == ERROR_IO_PENDING)
         {
             if (WaitForSingleObject(this->hRequestOpenEvent, dwTimeout))
@@ -169,7 +167,7 @@ BOOL AsyncInet::SendRequest(string szURL, RequestType requestType, string szRequ
         requestFlag = HttpSendRequestA(this->hInetRequest, NULL, 0, const_cast<char*>(szRequestData.c_str()), szRequestData.size());
     }
     else {
-        string szHeaders = "Content-Type: application/x-www-form-urlencoded";
+        std::string szHeaders = "Content-Type: application/x-www-form-urlencoded";
         requestFlag = HttpSendRequestA(this->hInetRequest, szHeaders.c_str(), szHeaders.size(), const_cast<char*>(szRequestData.c_str()), szRequestData.size());
     }
 
